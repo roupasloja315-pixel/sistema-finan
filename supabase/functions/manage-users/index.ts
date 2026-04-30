@@ -38,20 +38,22 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({ error: "Users already initialized" }, 400);
       }
 
+      // Create admin user
       const { data: adminData, error: adminError } =
         await supabaseAdmin.auth.admin.createUser({
-          email: "tecnocar@gmail.com",
-          password: "tecnocar321.",
+          email: "cleitonmaster@gmail.com",
+          password: "master123456",
           email_confirm: true,
         });
       if (adminError) throw adminError;
 
       await supabaseAdmin.from("profiles").insert({
         id: adminData.user.id,
-        email: "tecnocar@gmail.com",
-        role: "tecnocar321.",
+        email: "cleitonmaster@gmail.com",
+        role: "admin",
       });
 
+      // Create regular user
       const { data: userData, error: userError } =
         await supabaseAdmin.auth.admin.createUser({
           email: "tecnocar@gmail.com",
