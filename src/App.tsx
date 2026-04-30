@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { AuthProvider, useAuth } from './lib/auth';
 import LoginPage from './components/LoginPage';
 import AdminPage from './components/AdminPage';
@@ -7,7 +7,7 @@ import LaunchExpensePage from './components/Expenses/LaunchExpensePage';
 import LaunchRevenuePage from './components/Revenue/LaunchRevenuePage';
 import DashboardPage from './components/Dashboard/DashboardPage';
 import { ActiveView } from './lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 function AppContent() {
   const { session, profile, loading, signOut } = useAuth();
@@ -16,7 +16,10 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-cyan-400" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="animate-spin text-cyan-400" />
+          <p className="text-sm text-slate-400">Carregando...</p>
+        </div>
       </div>
     );
   }
@@ -40,19 +43,45 @@ function AppContent() {
       <div className="relative z-10">
         <Navigation activeView={activeView} onViewChange={setActiveView} onSignOut={signOut} />
         <main>
-          {activeView === 'launch-expense' && <LaunchExpensePage />}
-          {activeView === 'launch-revenue' && <LaunchRevenuePage />}
-          {activeView === 'dashboard' && <DashboardPage />}
+          <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 size={32} className="animate-spin text-cyan-400" /></div>}>
+            {activeView === 'launch-expense' && <LaunchExpensePage />}
+            {activeView === 'launch-revenue' && <LaunchRevenuePage />}
+            {activeView === 'dashboard' && <DashboardPage />}
+          </Suspense>
         </main>
       </div>
     </div>
   );
 }
 
-export default function App() {
+function ErrorFallback({ error }: { error: Error }) {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+      <div className="max-w-md text-center">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/20 mb-4">
+          <AlertCircle size={24} className="text-red-400" />
+        </div>
+        <h2 className="text-xl font-bold text-white mb-2">Erro na inicialização</h2>
+        <p className="text-sm text-slate-400 mb-4">{error.message}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-lg transition-colors"
+        >
+          Tentar novamente
+        </button>
+      </div>
+    </div>
   );
+}
+
+export default function App() {
+  try {
+    return (
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    );
+  } catch (error) {
+    return <ErrorFallback error={error instanceof Error ? error : new Error('Unknown error')} />;
+  }
 }
