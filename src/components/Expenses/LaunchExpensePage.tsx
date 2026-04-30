@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, Calendar, FileText, AlertCircle, CheckCircle, Trash2, Clock, CreditCard, Pencil } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { Expense } from '../../lib/types';
 import { formatBRL, parseBRL, PAYMENT_METHODS } from '../../lib/currency';
 import UnitCategorySelector, { HierarchySelection } from '../shared/UnitCategorySelector';
 import EditRecordModal from '../shared/EditRecordModal';
@@ -15,7 +14,15 @@ interface FormState {
   paymentMethod: string;
 }
 
-interface RecentExpense extends Expense {
+interface RecentExpense {
+  id: string;
+  unit_id: string | null;
+  category_id: string | null;
+  subcategory_id: string | null;
+  value: number;
+  observation: string;
+  date: string;
+  payment_method: string | null;
   units?: { name: string; color: string };
   categories?: { name: string };
   subcategories?: { name: string };

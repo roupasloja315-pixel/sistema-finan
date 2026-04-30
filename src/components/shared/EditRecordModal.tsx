@@ -75,7 +75,6 @@ export default function EditRecordModal({ record, onClose, onSaved }: Props) {
     }, 800);
   }
 
-  const accentColor = isExpense ? 'red' : 'emerald';
   const focusBorder = isExpense ? 'focus:border-red-500/50' : 'focus:border-emerald-500/50';
 
   return (
